@@ -19,6 +19,7 @@ import (
     
     wsHandler "github.com/leococonut8585/dev-genesis/internal/websocket"
     "github.com/leococonut8585/dev-genesis/internal/installer"
+    "github.com/leococonut8585/dev-genesis/internal/powershell"
 )
 
 //go:embed all:../../web/static all:../../web/templates
@@ -108,7 +109,7 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request) {
     handler.SendStatus("Connected to Dev Genesis server")
     
     // Create installer manager
-    scriptDir := filepath.Join(filepath.Dir(os.Args[0]), "scripts", "install")
+    scriptDir, _ := powershell.GetScriptDirectory()
     manager := installer.NewManager(handler, scriptDir)
     
     // Wait for install command instead of auto-starting

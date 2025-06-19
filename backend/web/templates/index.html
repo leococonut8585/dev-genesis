@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="ja" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dev Genesis - Click Once, Code Forever</title>
+    
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <!-- Inline CSS for ultimate performance -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a0a;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        /* Animated background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a0033 50%, #000428 100%);
+            z-index: -2;
+        }
+        
+        .bg-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.5;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: #ffffff;
+            border-radius: 50%;
+            animation: float 20s infinite ease-in-out;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100vh) translateX(100px); opacity: 0; }
+        }
+        
+        /* Main container */
+        .container {
+            text-align: center;
+            padding: 2rem;
+            max-width: 600px;
+            width: 100%;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Logo/Title */
+        .logo {
+            font-size: 3rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+            letter-spacing: -0.02em;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow {
+            from { filter: drop-shadow(0 0 20px rgba(102, 126, 234, 0.5)); }
+            to { filter: drop-shadow(0 0 30px rgba(240, 147, 251, 0.8)); }
+        }
+        
+        .tagline {
+            font-size: 1.2rem;
+            color: #888;
+            margin-bottom: 3rem;
+        }
+        
+        /* Genesis button */
+        .genesis-button {
+            width: 250px;
+            height: 250px;
+            margin: 0 auto 3rem;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .genesis-button:hover {
+            transform: scale(1.05);
+        }
+        
+        .genesis-button.installing {
+            animation: rotate 2s linear infinite;
+            cursor: not-allowed;
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .button-inner {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            box-shadow: 0 10px 40px rgba(102, 126, 234, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .button-inner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                45deg,
+                transparent,
+                rgba(255, 255, 255, 0.1),
+                transparent
+            );
+            transform: rotate(45deg);
+            transition: all 0.5s;
+        }
+        
+        .genesis-button:hover .button-inner::before {
+            animation: shine 0.5s ease-in-out;
+        }
+        
+        @keyframes shine {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+        
+        /* Progress section */
+        .progress-section {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+        }
+        
+        .progress-section.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2, #f093fb);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.5);
+        }
+        
+        .status-text {
+            font-size: 1.1rem;
+            color: #ccc;
+            margin-bottom: 0.5rem;
+        }
+        
+        .percentage {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea, #f093fb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        /* Success animation */
+        .success-animation {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 5rem;
+            z-index: 1000;
+        }
+        
+        @keyframes celebrate {
+            0% { transform: translate(-50%, -50%) scale(0) rotate(0deg); }
+            50% { transform: translate(-50%, -50%) scale(1.2) rotate(180deg); }
+            100% { transform: translate(-50%, -50%) scale(1) rotate(360deg); }
+        }
+        
+        /* Tool list */
+        .tool-list {
+            margin-top: 2rem;
+            text-align: left;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+        }
+        
+        .tool-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.8rem;
+            font-size: 0.95rem;
+            color: #888;
+            transition: all 0.3s ease;
+        }
+        
+        .tool-item.completed {
+            color: #4ade80;
+        }
+        
+        .tool-item.installing {
+            color: #fbbf24;
+        }
+        
+        .tool-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Error state */
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+            color: #f87171;
+        }
+    </style>
+</head>
+<body x-data="devGenesis()">
+    <div class="bg-animation"></div>
+    <div class="bg-particles">
+        <template x-for="i in 50">
+            <div class="particle" 
+                 :style="`left: ${Math.random() * 100}%; animation-delay: ${Math.random() * 20}s;`">
+            </div>
+        </template>
+    </div>
+    
+    <div class="container">
+        <h1 class="logo">Dev Genesis</h1>
+        <p class="tagline">Click Once, Code Forever</p>
+        
+        <div class="genesis-button" 
+             @click="startInstallation" 
+             :class="{ 'installing': installing }">
+            <div class="button-inner">
+                <span x-show="!installing">GENESIS</span>
+                <span x-show="installing">¡</span>
+            </div>
+        </div>
+        
+        <div class="progress-section" :class="{ 'show': installing || completed }">
+            <div class="progress-bar">
+                <div class="progress-fill" :style="`width: ${progress}%`"></div>
+            </div>
+            <div class="status-text" x-text="status"></div>
+            <div class="percentage" x-text="`${progress}%`"></div>
+            
+            <div class="tool-list" x-show="installing || completed">
+                <template x-for="tool in tools">
+                    <div class="tool-item" 
+                         :class="{ 
+                             'completed': tool.status === 'completed',
+                             'installing': tool.status === 'installing' 
+                         }">
+                        <div class="tool-icon">
+                            <span x-show="tool.status === 'pending'">Ë</span>
+                            <span x-show="tool.status === 'installing'">ó</span>
+                            <span x-show="tool.status === 'completed'"></span>
+                        </div>
+                        <span x-text="tool.name"></span>
+                    </div>
+                </template>
+            </div>
+        </div>
+        
+        <div class="error-message" x-show="error" x-text="error"></div>
+    </div>
+    
+    <div class="success-animation" x-show="completed"><‰</div>
+    
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
