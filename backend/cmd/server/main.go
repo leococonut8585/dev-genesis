@@ -2,9 +2,7 @@ package main
 
 import (
     "context"
-    "embed"
     "encoding/json"
-    "io/fs"
     "log"
     "net/http"
     "os"
@@ -19,11 +17,7 @@ import (
     
     wsHandler "github.com/leococonut8585/dev-genesis/internal/websocket"
     "github.com/leococonut8585/dev-genesis/internal/installer"
-    "github.com/leococonut8585/dev-genesis/internal/powershell"
 )
-
-//go:embed web/static web/templates
-var webUI embed.FS
 
 var upgrader = websocket.Upgrader{
     CheckOrigin: func(r *http.Request) bool {
@@ -45,11 +39,11 @@ func main() {
     router.HandleFunc("/api/install", handleInstall).Methods("POST")
     router.HandleFunc("/api/status", handleStatus).Methods("GET")
     
-    staticFS, err := fs.Sub(webUI, "web/static")
-    if err != nil {
-        log.Fatal(err)
-    }
-    router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.FS(staticFS))))
+    // Serve static files from filesystem instead of embed
+    router.PathPrefix("/static/").Handler(
+        http.StripPrefix("/static/", 
+            http.FileServer(http.Dir("./web/static"))))
+    
     router.HandleFunc("/", serveIndex)
     
     srv := &http.Server{
@@ -84,14 +78,7 @@ func main() {
 }
 
 func serveIndex(w http.ResponseWriter, r *http.Request) {
-    indexHTML, err := webUI.ReadFile("web/templates/index.html")
-    if err != nil {
-        http.Error(w, "Failed to load index.html", http.StatusInternalServerError)
-        return
-    }
-    
-    w.Header().Set("Content-Type", "text/html; charset=utf-8")
-    w.Write(indexHTML)
+    http.ServeFile(w, r, "./web/templates/index.html")
 }
 
 func handleWebSocket(w http.ResponseWriter, r *http.Request) {
@@ -108,31 +95,23 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request) {
     
     handler.SendStatus("Connected to Dev Genesis server")
     
-    // Create installer manager
-    scriptDir, _ := powershell.GetScriptDirectory()
+    scriptDir := filepath.Join("scripts", "install")
     manager := installer.NewManager(handler, scriptDir)
     
-    // Wait for install command instead of auto-starting
-    go func() {
-        for {
-            var msg wsHandler.Message
-            if err := conn.ReadJSON(&msg); err != nil {
-                log.Printf("WebSocket read error: %v", err)
-                break
-            }
-            if msg.Type == wsHandler.TypeInstall {
-                log.Println("🚀 Installation command received")
-                go manager.InstallAll()
-            }
+    for {
+        var msg wsHandler.Message
+        if err := conn.ReadJSON(&msg); err != nil {
+            log.Printf("WebSocket read error: %v", err)
+            break
         }
-    }()
-    
-    // Wait for handler completion
-    select {}
+        if msg.Type == wsHandler.TypeInstall {
+            log.Println("🚀 Installation command received")
+            go manager.InstallAll()
+        }
+    }
 }
 
 func handleInstall(w http.ResponseWriter, r *http.Request) {
-    // TODO: Trigger installation via WebSocket
     w.Header().Set("Content-Type", "application/json")
     json.NewEncoder(w).Encode(map[string]string{
         "status": "started",

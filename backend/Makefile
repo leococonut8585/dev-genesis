@@ -7,7 +7,7 @@ all: build
 
 build:
 	@echo "🔨 Building Dev Genesis..."
-	cd .. && go build -o $(BINARY_NAME) backend/cmd/server/main.go
+	go build -o $(BINARY_PATH) cmd/server/main.go
 	@echo "✅ Build complete: $(BINARY_PATH)"
 
 run: build
@@ -32,5 +32,5 @@ deps:
 # Windows specific build
 build-windows:
 	@echo "🔨 Building for Windows..."
-	cd .. && GOOS=windows GOARCH=amd64 go build -o $(BINARY_NAME).exe backend/cmd/server/main.go
+	GOOS=windows GOARCH=amd64 go build -o $(BINARY_PATH).exe cmd/server/main.go
 	@echo "✅ Windows build complete: $(BINARY_PATH).exe"
