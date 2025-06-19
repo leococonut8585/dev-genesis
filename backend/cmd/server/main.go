@@ -22,7 +22,7 @@ import (
     "github.com/leococonut8585/dev-genesis/internal/powershell"
 )
 
-//go:embed all:../../web/static all:../../web/templates
+//go:embed ../../web/static/* ../../web/templates/*
 var webUI embed.FS
 
 var upgrader = websocket.Upgrader{
