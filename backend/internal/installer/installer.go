@@ -52,7 +52,7 @@ func NewManager(ws *websocket.Handler, scriptDir string) *Manager {
 }
 
 func (m *Manager) InstallAll() error {
-    m.ws.SendStatus("=€ Starting Dev Genesis installation...")
+    m.ws.SendStatus("[START] Starting Dev Genesis installation...")
     
     for i, tool := range Tools {
         if err := m.installTool(tool, i); err != nil {
@@ -61,7 +61,7 @@ func (m *Manager) InstallAll() error {
         }
     }
     
-    m.ws.SendComplete("<‰ All tools installed successfully!")
+    m.ws.SendComplete("[SUCCESS] All tools installed successfully!")
     return nil
 }
 
@@ -110,7 +110,7 @@ func (m *Manager) installTool(tool Tool, index int) error {
     m.mu.Unlock()
     
     finalProgress := m.calculateBaseProgress()
-    m.ws.SendProgress(finalProgress, fmt.Sprintf(" %s installed", tool.Name))
+    m.ws.SendProgress(finalProgress, fmt.Sprintf("[OK] %s installed", tool.Name))
     
     return nil
 }
