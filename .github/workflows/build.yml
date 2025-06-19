@@ -12,52 +12,57 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+    - uses: actions/checkout@v4
     
     - name: Set up Go
-      uses: actions/setup-go@v5
+      uses: actions/setup-go@v4
       with:
         go-version: '1.22'
-    
+        
     - name: Cache Go modules
-      uses: actions/cache@v4
+      uses: actions/cache@v3
       with:
         path: ~/go/pkg/mod
-        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+        key: ${{ runner.os }}-go-${{ hashFiles('backend/go.sum') }}
         restore-keys: |
           ${{ runner.os }}-go-
     
-    - name: Install dependencies
+    - name: Download dependencies
+      run: go mod download
       working-directory: ./backend
-      run: |
-        go mod download
-        go mod verify
-    
+      
+    - name: Verify dependencies
+      run: go mod verify
+      working-directory: ./backend
+      
     - name: Build
+      run: make build
       working-directory: ./backend
-      run: |
-        make build
-        ls -la ../dev-genesis
-    
+      
     - name: Test
-      working-directory: ./backend
       run: go test -v ./...
-    
-    - name: Build for Windows
       working-directory: ./backend
-      run: |
-        make build-windows
-        ls -la ../dev-genesis.exe
-    
+      
+    - name: Build for Windows
+      run: GOOS=windows GOARCH=amd64 go build -o ../dev-genesis.exe cmd/server/main.go
+      working-directory: ./backend
+      
+    - name: Build for Linux
+      run: GOOS=linux GOARCH=amd64 go build -o ../dev-genesis-linux cmd/server/main.go
+      working-directory: ./backend
+      
+    - name: Build for macOS
+      run: GOOS=darwin GOARCH=amd64 go build -o ../dev-genesis-macos cmd/server/main.go
+      working-directory: ./backend
+      
     - name: Upload artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v3
       with:
-        name: dev-genesis-binaries
+        name: binaries
         path: |
-          dev-genesis
           dev-genesis.exe
-        retention-days: 7
+          dev-genesis-linux
+          dev-genesis-macos
 
   release:
     name: Create Release
@@ -66,22 +71,40 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+    - uses: actions/checkout@v4
     
     - name: Download artifacts
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v3
       with:
-        name: dev-genesis-binaries
-    
+        name: binaries
+        
     - name: Create Release
       uses: softprops/action-gh-release@v1
-      if: startsWith(github.ref, 'refs/tags/')
       with:
+        tag_name: v1.0.${{ github.run_number }}
+        name: Dev Genesis v1.0.${{ github.run_number }}
+        body: |
+          ## Dev Genesis - One-click Development Environment Setup
+          
+          ### 🚀 What's New
+          - Automated installation of Python, Node.js, Git, VS Code, WSL2, and Claude Code
+          - Beautiful real-time progress UI
+          - Parallel installation support
+          - Retry mechanism for network errors
+          
+          ### 📦 Downloads
+          - **Windows**: `dev-genesis.exe`
+          - **Linux**: `dev-genesis-linux`
+          - **macOS**: `dev-genesis-macos`
+          
+          ### 🎯 Usage
+          1. Download the appropriate binary for your system
+          2. Run the executable
+          3. Click the "GENESIS" button
+          4. Watch the magic happen!
         files: |
-          dev-genesis
           dev-genesis.exe
-        draft: false
-        prerelease: false
+          dev-genesis-linux
+          dev-genesis-macos
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
