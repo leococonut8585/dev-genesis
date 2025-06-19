@@ -18,6 +18,7 @@ const (
     TypeComplete MessageType = "complete"
     TypePing     MessageType = "ping"
     TypePong     MessageType = "pong"
+    TypeInstall  MessageType = "install"
 )
 
 type Message struct {

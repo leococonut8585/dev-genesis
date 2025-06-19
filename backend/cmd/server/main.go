@@ -107,20 +107,26 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request) {
     
     handler.SendStatus("Connected to Dev Genesis server")
     
-    // Get script directory path
-    scriptDir := filepath.Join("scripts", "install")
-    
     // Create installer manager
+    scriptDir := filepath.Join(filepath.Dir(os.Args[0]), "scripts", "install")
     manager := installer.NewManager(handler, scriptDir)
     
-    // Start installation
+    // Wait for install command instead of auto-starting
     go func() {
-        if err := manager.InstallAll(); err != nil {
-            log.Printf("Installation failed: %v", err)
+        for {
+            var msg wsHandler.Message
+            if err := conn.ReadJSON(&msg); err != nil {
+                log.Printf("WebSocket read error: %v", err)
+                break
+            }
+            if msg.Type == wsHandler.TypeInstall {
+                log.Println("🚀 Installation command received")
+                go manager.InstallAll()
+            }
         }
     }()
     
-    // Keep connection alive
+    // Wait for handler completion
     select {}
 }
 
