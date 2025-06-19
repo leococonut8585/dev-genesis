@@ -127,3 +127,8 @@ func handleStatus(w http.ResponseWriter, r *http.Request) {
         "tools": installer.Tools,
     })
 }
+
+func init() {
+    log.Printf("Dev Genesis v%s - Built on %s", Version, BuildDate)
+    log.Printf("Created by %s", Author)
+}

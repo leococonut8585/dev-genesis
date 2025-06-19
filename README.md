@@ -51,6 +51,24 @@ Built with:
 - Installer: PowerShell + WinGet
 - Communication: WebSocket
 
+## 📥 Download
+
+### Windows Users (Recommended)
+Download the installer: [DevGenesisInstaller.exe](https://github.com/leococonut8585/dev-genesis/releases/latest/download/DevGenesisInstaller.exe)
+
+### Direct Downloads
+- Windows: [dev-genesis-windows-amd64.exe](https://github.com/leococonut8585/dev-genesis/releases/latest/download/dev-genesis-windows-amd64.exe)
+- Linux: [dev-genesis-linux-amd64](https://github.com/leococonut8585/dev-genesis/releases/latest/download/dev-genesis-linux-amd64)
+- macOS Intel: [dev-genesis-darwin-amd64](https://github.com/leococonut8585/dev-genesis/releases/latest/download/dev-genesis-darwin-amd64)
+- macOS Apple Silicon: [dev-genesis-darwin-arm64](https://github.com/leococonut8585/dev-genesis/releases/latest/download/dev-genesis-darwin-arm64)
+
+## 🔐 Verification
+
+Verify downloads using the provided checksums:
+```bash
+sha256sum -c checksums.txt
+```
+
 ## 👑 Created for the Divine Signore
 
 *"If Giovanni weren't here, the master might destroy the earth."*
